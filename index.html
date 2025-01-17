@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html class="h-full dark" style="color-scheme: dark;">
+
+<head>
+  <title>Chat with Llama2</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="shortcut icon" type="image/x-icon" href="favicon.ico">
+  <script src="resources/marked.min.js"
+    integrity="sha384-dZulhREgb+hCgQMhZ2VG0l37VQj5pJBq2w0h7Jn3tdMn36aXNepF1+FMLBB4O649"
+    crossorigin="anonymous"></script>
+  <script src="resources/purify.min.js" integrity="sha256-QigBQMy2be3IqJD2ezKJUJ5gycSmyYlRHj2VGBuITpU="
+    crossorigin="anonymous"></script>
+  <script src="https://cdn.tailwindcss.com?plugins=typography"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          borderRadius: {
+            lg: 'var(--radius)',
+            md: 'calc(var(--radius) - 2px)',
+            sm: 'calc(var(--radius) - 4px)'
+          },
+          borderColor: {
+            DEFAULT: 'hsl(var(--border))'
+          },
+          colors: {
+            background: 'hsl(var(--background))',
+            foreground: 'hsl(var(--foreground))',
+            card: {
+              DEFAULT: 'hsl(var(--card))',
+              foreground: 'hsl(var(--card-foreground))'
+            },
+            popover: {
+              DEFAULT: 'hsl(var(--popover))',
+              foreground: 'hsl(var(--popover-foreground))'
+            },
+            primary: {
+              DEFAULT: 'hsl(var(--primary))',
+              foreground: 'hsl(var(--primary-foreground))'
+            },
+            secondary: {
+              DEFAULT: 'hsl(var(--secondary))',
+              foreground: 'hsl(var(--secondary-foreground))'
+            },
+            muted: {
+              DEFAULT: 'hsl(var(--muted))',
+              foreground: 'hsl(var(--muted-foreground))'
+            },
+            accent: {
+              DEFAULT: 'hsl(var(--accent))',
+              foreground: 'hsl(var(--accent-foreground))'
+            },
+            destructive: {
+              DEFAULT: 'hsl(var(--destructive))',
+              foreground: 'hsl(var(--destructive-foreground))'
+            },
+            border: 'hsl(var(--border))',
+            input: 'hsl(var(--input))',
+            ring: 'hsl(var(--ring))',
+            chart: {
+              '1': 'hsl(var(--chart-1))',
+              '2': 'hsl(var(--chart-2))',
+              '3': 'hsl(var(--chart-3))',
+              '4': 'hsl(var(--chart-4))',
+              '5': 'hsl(var(--chart-5))'
+            }
+          }
+        }
+
+      }
+    }
+  </script>
+  <style type="text/tailwindcss">
+    @layer base {
+      :root {
+        --background: 0 0% 100%;
+        --foreground: 240 10% 3.9%;
+        --card: 0 0% 100%;
+        --card-foreground: 240 10% 3.9%;
+        --popover: 0 0% 100%;
+        --popover-foreground: 240 10% 3.9%;
+        --primary: 240 5.9% 10%;
+        --primary-foreground: 0 0% 98%;
+        --secondary: 240 4.8% 95.9%;
+        --secondary-foreground: 240 5.9% 10%;
+        --muted: 240 4.8% 95.9%;
+        --muted-foreground: 240 3.8% 46.1%;
+        --accent: 240 4.8% 95.9%;
+        --accent-foreground: 240 5.9% 10%;
+        --destructive: 0 84.2% 60.2%;
+        --destructive-foreground: 0 0% 98%;
+        --border: 240 5.9% 90%;
+        --input: 240 5.9% 90%;
+        --ring: 240 5.9% 10%;
+        --radius: 1rem;
+        --chart-1: 12 76% 61%;
+        --chart-2: 173 58% 39%;
+        --chart-3: 197 37% 24%;
+        --chart-4: 43 74% 66%;
+        --chart-5: 27 87% 67%;
+      }
+
+      .dark {
+        --background: 240 10% 3.9%;
+        --foreground: 0 0% 98%;
+        --card: 240 10% 3.9%;
+        --card-foreground: 0 0% 98%;
+        --popover: 240 10% 3.9%;
+        --popover-foreground: 0 0% 98%;
+        --primary: 0 0% 98%;
+        --primary-foreground: 240 5.9% 10%;
+        --secondary: 240 3.7% 15.9%;
+        --secondary-foreground: 0 0% 98%;
+        --muted: 240 3.7% 15.9%;
+        --muted-foreground: 240 5% 64.9%;
+        --accent: 240 3.7% 15.9%;
+        --accent-foreground: 0 0% 98%;
+        --destructive: 0 62.8% 30.6%;
+        --destructive-foreground: 0 0% 98%;
+        --border: 240 3.7% 15.9%;
+        --input: 240 3.7% 15.9%;
+        --ring: 240 4.9% 83.9%;
+        --chart-1: 220 70% 50%;
+        --chart-2: 160 60% 45%;
+        --chart-3: 30 80% 55%;
+        --chart-4: 280 65% 60%;
+        --chart-5: 340 75% 55%;
+      }
+    }
+  </style>
+  <link rel="stylesheet" href="chat.css">
+</head>
+
+<body class="h-screen grid bg-background">
+  <!-- Top Bar -->
+  <div class="border-b px-2 py-1 flex justify-start items-center bg-background" style="grid-area: header;">
+    <h1 class="text-xl font-thin">Chat with Ollama</h1>
+  </div>
+
+  <!-- Middle Section -->
+  <div id="main" style="grid-area: main;">
+    <div class="border-r px-2 py-2 bg-background" style="grid-area: lnav;">
+      <div>
+        <label class="font-thin text-sm" for="system-prompt">System Prompt</label>
+        <input id="system-prompt" type="text" placeholder="You are a helpful assistant"
+          class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm" />
+      </div>
+
+      <div class="row">
+        <label class="font-thin text-sm" for="host-address">Hostname</label>
+        <input id="host-address" type="text" placeholder="http://localhost:11434"
+          class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm" />
+      </div>
+
+      <div>
+        <label class="font-thin text-sm" for="model-select">Model:</label>
+        <select id="model-select"
+          class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"></select>
+      </div>
+
+      <div>
+        <label class="font-thin text-sm" for="chat-select">History:</label>
+        <select id="chat-select"
+          class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm">
+          <option value="" disabled selected>Select a chat</option>
+        </select>
+      </div>
+
+      <div class="flex gap-1 pt-4">
+        <button
+          class="h-8 rounded-md px-3 text-xs flex-1 bg-secondary text-secondary-foreground shadow-sm hover:bg-secondary/80"
+          id="new-chat" type="button">Reset</button>
+        <button class="h-8 rounded-md px-3 text-xs flex-1 bg-primary text-primary-foreground shadow hover:bg-primary/90"
+          id="save-chat" type="button" data-bs-toggle="modal" data-bs-target="#nameModal">Save</button>
+        <button
+          class="h-8 rounded-md px-3 text-xs flex-1 bg-destructive text-destructive-foreground shadow-sm hover:bg-destructive/90"
+          id="delete-chat" type="button">Delete</button>
+      </div>
+    </div>
+
+    <div id="chat-group" class="px-4 py-2" style="grid-area: chat">
+      <div class="h-0 min-h-full overflow-y-auto" style="grid-area: cscroll">
+        <div id="scroll-wrapper">
+          <div id="chat-container" class="card">
+            <div class="card-body">
+              <div class="prose prose-md prose-invert mx-auto" id="chat-history"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex gap-2 items-center" style="grid-area: cfield">
+        <textarea
+          class="flex-1 flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
+          id="user-input" placeholder="Type your question here..." oninput="autoGrow(this)"></textarea>
+        <button id="send-button"
+          class="max-w-20 h-8 rounded-md px-3 text-xs flex-1 bg-primary text-primary-foreground shadow hover:bg-primary/90">Send</button>
+      </div>
+    </div>
+
+    <!-- Modal -->
+    <dialog class="min-w-[300px] bg-background p-4 border rounded-xl " id="nameModal" tabindex="-1"
+      aria-labelledby="nameModalLabel" aria-hidden="true">
+      <div class="flex flex-col gap-2">
+        <h5 class="modal-title" id="nameModalLabel">Enter A Name For This Chat</h5>
+        <hr />
+        <input type="text"
+          class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
+          id="userName" placeholder="Some Chat Name...">
+        <div class="flex flex-row justify-end gap-1 w-full">
+          <button type="button" class="max-w-20 h-8 rounded-md px-3 text-xs flex-1  hover:bg-primary/10"
+            id="closeName">Close</button>
+          <button type="button"
+            class="max-w-20 h-8 rounded-md px-3 text-xs flex-1 bg-primary text-primary-foreground shadow hover:bg-primary/90"
+            id="saveName">Save</button>
+        </div>
+      </div>
+    </dialog>
+
+    <!--<div class="modal fade" id="errorModal" tabindex="-1">-->
+    <!--  <div class="modal-dialog modal-xl">-->
+    <!--    <div class="modal-content">-->
+    <!--      <div class="modal-header">-->
+    <!--        <h5 class="modal-title">Unable to access Ollama server</h5>-->
+    <!--        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>-->
+    <!--      </div>-->
+    <!--      <div class="modal-body">-->
+    <!--        <p id="errorText"></p>-->
+    <!--      </div>-->
+    <!--    </div>-->
+
+    <!--  </div>-->
+    <!--</div>-->
+  </div>
+  <footer class="border-t bg-background" style="grid-area: footer;"></footer>
+
+  <script src="api.js"></script>
+  <script src="chat.js"></script>
+
+</body>
+
+</html>

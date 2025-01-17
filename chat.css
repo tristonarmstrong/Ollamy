@@ -1,0 +1,110 @@
+* {
+  border-color: hsl(var(--border));
+}
+
+
+body {
+  display: grid;
+  grid-template-columns: auto auto auto;
+  grid-template-rows: 50px auto 50px;
+  grid-template-areas: "header header header"
+    "main main main"
+    "footer footer footer";
+
+  opacity: 0.8;
+  background-image: radial-gradient(hsl(var(--border)) 0.5px, hsl(var(--background)) 0.5px);
+  background-size: 10px 10px;
+}
+
+#main {
+  display: grid;
+  grid-template-columns: 300px auto auto;
+  grid-template-rows: auto auto auto;
+  grid-template-areas: "lnav chat chat"
+    "lnav chat chat"
+    "lnav chat chat";
+}
+
+#chat-group {
+  display: grid;
+  grid-template-columns: auto auto;
+  grid-template-rows: auto 50px;
+  grid-template-areas:
+    "cscroll cscroll cscroll"
+    "cfield cfield cfield";
+}
+
+.user-message {
+  padding: 10px;
+  border-radius: 10px;
+  white-space: pre-wrap;
+  margin-left: auto;
+  margin-right: 0;
+  max-width: 90%;
+  background-color: hsl(var(--primary));
+  color: black;
+}
+
+/* Style for received messages */
+.response-message {
+  padding: 10px;
+  border-radius: 10px;
+  padding-right: 20px;
+  position: relative;
+  margin-right: auto;
+  max-width: 90%;
+  background-color: hsl(var(--secondary));
+}
+
+.response-message p {
+  margin-right: 40px;
+  /* Add more styles here */
+}
+
+/* Style for the chat container */
+#chat-container {
+  display: none;
+  margin: 0 auto;
+  overflow: auto;
+}
+
+.host-address-select {
+  background-color: red;
+  color: white;
+  padding: 1000px;
+  border-radius: 1000px;
+}
+
+#chat-history {
+  display: flex;
+  flex-direction: column;
+}
+
+.copy-button {
+  position: absolute;
+  bottom: 5px;
+  right: 5px;
+  margin: 0 5px 5px 0;
+}
+
+#scroll-wrapper {}
+
+#input-area {}
+
+#user-input {
+  overflow-y: auto;
+  resize: none;
+  /* Prevent user from manually resizing */
+  height: 40px;
+  max-height: 200px;
+  /* Set your desired max height here */
+}
+
+@media (max-width: 600px) {
+
+  /* Adjust 600px to the breakpoint you desire */
+  .d-flex h1 {
+    display: none;
+    /* This will hide the h1 when the window width is 600px or less */
+  }
+}
