@@ -1,0 +1,3 @@
+class ChatHistory {
+  constructor() {}
+}

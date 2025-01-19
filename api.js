@@ -1,107 +1,75 @@
-var rebuildRules = undefined;
-if (typeof chrome !== "undefined" && chrome.runtime && chrome.runtime.id) {
-    rebuildRules = async function (domain) {
-    const domains = [domain];
-    /** @type {chrome.declarativeNetRequest.Rule[]} */
-    const rules = [{
-      id: 1,
-      condition: {
-        requestDomains: domains
-      },
-      action: {
-        type: 'modifyHeaders',
-        requestHeaders: [{
-          header: 'origin',
-          operation: 'set',
-          value: `http://${domain}`,
-        }],
-      },
-    }];
-    await chrome.declarativeNetRequest.updateDynamicRules({
-      removeRuleIds: rules.map(r => r.id),
-      addRules: rules,
-    });
-  }
-}
-
-
 var ollama_host = localStorage.getItem("host-address");
-if (!ollama_host){
-  ollama_host = 'http://localhost:11434'
+if (!ollama_host) {
+  ollama_host = "http://localhost:11434";
 } else {
   document.getElementById("host-address").value = ollama_host;
 }
 
 const ollama_system_prompt = localStorage.getItem("system-prompt");
-if (ollama_system_prompt){
+if (ollama_system_prompt) {
   document.getElementById("system-prompt").value = ollama_system_prompt;
 }
 
-if (rebuildRules){
+if (rebuildRules) {
   rebuildRules(ollama_host);
 }
 
-function setHostAddress(){
+function setHostAddress() {
   ollama_host = document.getElementById("host-address").value;
   localStorage.setItem("host-address", ollama_host);
   populateModels();
-  if (rebuildRules){
+  if (rebuildRules) {
     rebuildRules(ollama_host);
   }
 }
 
-function setSystemPrompt(){
+function setSystemPrompt() {
   const systemPrompt = document.getElementById("system-prompt").value;
   localStorage.setItem("system-prompt", systemPrompt);
 }
 
-
-
-async function getModels(){
+/**
+ * @returns {Promise<Model>}
+ */
+async function getModels() {
   const response = await fetch(`${ollama_host}/api/tags`);
-  const data = await response.json();
+  const /** @type {Model}*/ data = await response.json();
   return data;
 }
 
-
 // Function to send a POST request to the API
-function postRequest(data, signal) {
-  const URL = `${ollama_host}/api/generate`;
-  return fetch(URL, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify(data),
-    signal: signal
-  });
-}
+function postRequest(data, signal) {}
 
-// Function to stream the response from the server
-async function getResponse(response, callback) {
-  const reader = response.body.getReader();
-  let partialLine = '';
+/**
+ * Gets a reader and reads the response coming back from ollama api as its streamed in
+ * @param {Response} response
+ * @param {arg: Record<string, unknown> => void} callback
+ */
+async function getResponse(response, callback) {}
 
-  while (true) {
-    const { done, value } = await reader.read();
-    if (done) {
-      break;
-    }
-    // Decode the received value and split by lines
-    const textChunk = new TextDecoder().decode(value);
-    const lines = (partialLine + textChunk).split('\n');
-    partialLine = lines.pop(); // The last line might be incomplete
+/**
+ * @typedef {Object} Model
+ * @property {OllamaModel[]} models
+ */
 
-    for (const line of lines) {
-      if (line.trim() === '') continue;
-      const parsedResponse = JSON.parse(line);
-      callback(parsedResponse); // Process each response word
-    }
-  }
+/**
+ * A Model hosted by ollama
+ * @typedef {Object} OllamaModel
+ * @property {OllamaModelDetails} details
+ * @property {string} digest
+ * @property {string} model
+ * @property {string} modified_at
+ * @property {string} name
+ * @property {number} size
+ */
 
-  // Handle any remaining line
-  if (partialLine.trim() !== '') {
-    const parsedResponse = JSON.parse(partialLine);
-    callback(parsedResponse);
-  }
-}
+/**
+ * A Model's details
+ * @typedef {Object} OllamaModelDetails
+ * @property {string[]} families
+ * @property {string} family
+ * @property {string} format
+ * @property {string} parameter_size
+ * @property {string} parent_model
+ * @property {string} quantization_level
+ */
